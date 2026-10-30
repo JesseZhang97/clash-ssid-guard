@@ -6,12 +6,14 @@ struct SettingsView: View {
     @ObservedObject var store: ConfigStore
     @ObservedObject var login = LoginItem.shared
     @State private var newSSID = ""
+    @State private var listExpanded = false
+    private let collapsedCount = 5
 
     var body: some View {
         Form {
-            statusSection
-            listSection
+            masterSection
             behaviorSection
+            listSection
             locationSection
             logSection
         }
@@ -22,8 +24,25 @@ struct SettingsView: View {
 
     // MARK: 状态
 
-    private var statusSection: some View {
-        Section("当前状态") {
+    private var masterSection: some View {
+        Section {
+            HStack(spacing: 14) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("防护").font(.system(size: 22, weight: .semibold))
+                    Text(store.config.enabled ? "已开启" : "已暂停")
+                        .font(.callout)
+                        .foregroundStyle(store.config.enabled ? Color.green : Color.secondary)
+                }
+                Spacer()
+                Toggle("", isOn: $store.config.enabled)
+                    .labelsHidden()
+                    .toggleStyle(.switch)
+                    .controlSize(.large)
+                    .scaleEffect(1.4, anchor: .trailing)
+                    .padding(.trailing, 4)
+            }
+            .padding(.vertical, 8)
+
             row("Wi-Fi", dot: engine.wifi.connected ? (engine.alerting ? .red : .green) : .gray,
                 text: wifiText)
             row("Clash", dot: engine.clash.active ? .green : (engine.clash.appRunning ? .orange : .gray),
@@ -64,7 +83,7 @@ struct SettingsView: View {
     // MARK: 名单
 
     private var listSection: some View {
-        Section("Wi-Fi 名单") {
+        Section("Wi-Fi 名单（\(store.config.ssids.count)）") {
             Picker("模式", selection: $store.config.mode) {
                 ForEach(ListMode.allCases) { Text($0.title).tag($0) }
             }
@@ -74,7 +93,9 @@ struct SettingsView: View {
             if store.config.ssids.isEmpty {
                 Text("名单是空的").foregroundStyle(.secondary)
             }
-            ForEach(store.config.ssids, id: \.self) { s in
+            let all = store.config.ssids
+            let visible = (listExpanded || all.count <= collapsedCount) ? all : Array(all.prefix(collapsedCount))
+            ForEach(visible, id: \.self) { s in
                 HStack {
                     Text(s)
                     if s == engine.wifi.ssid { Text("当前").font(.caption).foregroundStyle(.blue) }
@@ -83,6 +104,12 @@ struct SettingsView: View {
                         .buttonStyle(.borderless)
                         .help("从名单删除")
                 }
+            }
+            if all.count > collapsedCount {
+                Button(listExpanded ? "收起" : "显示全部 \(all.count) 个") {
+                    withAnimation { listExpanded.toggle() }
+                }
+                .buttonStyle(.link)
             }
             HStack {
                 TextField("输入 Wi-Fi 名称（SSID）", text: $newSSID)
@@ -102,7 +129,6 @@ struct SettingsView: View {
 
     private var behaviorSection: some View {
         Section("行为") {
-            Toggle("启用防护", isOn: $store.config.enabled)
             Toggle("命中后自动断开", isOn: $store.config.autoDisconnect)
             Toggle("同时忘记该网络（需要管理员权限，可能失败）", isOn: $store.config.forgetNetwork)
                 .disabled(!store.config.autoDisconnect)
