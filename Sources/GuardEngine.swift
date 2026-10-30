@@ -32,6 +32,18 @@ final class GuardEngine: ObservableObject {
     }
 
     func start() {
+        if Demo.on {
+            wifi = Demo.wifi
+            clash = Demo.clash
+            log = ["启动。Wi-Fi：\(Demo.ssid)，Clash：开启",
+                   "Clash：开启，TUN utun5 198.18.0.1",
+                   "Wi-Fi：\(Demo.ssid)"].map { LogEntry(text: $0) }
+            if Demo.alert {
+                log.append(LogEntry(text: "命中「\(Demo.ssid)」且 Clash 开启：已断开"))
+                alerting = true
+            }
+            return
+        }
         clashMonitor.onChange = { [weak self] s in
             guard let self = self else { return }
             self.clash = s
@@ -114,6 +126,7 @@ final class GuardEngine: ObservableObject {
         let e = LogEntry(text: text)
         log.append(e)
         if log.count > 60 { log.removeFirst(log.count - 60) }
+        if Demo.on { return }
         if let data = (e.line + "\n").data(using: .utf8) {
             if let h = try? FileHandle(forWritingTo: logURL) {
                 h.seekToEndOfFile(); h.write(data); try? h.close()

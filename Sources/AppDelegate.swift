@@ -8,7 +8,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUser
     private var cancellables = Set<AnyCancellable>()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        if let id = Bundle.main.bundleIdentifier,
+        if !Demo.on, let id = Bundle.main.bundleIdentifier,
            NSRunningApplication.runningApplications(withBundleIdentifier: id).count > 1 {
             NSApp.terminate(nil)
             return
@@ -31,12 +31,50 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUser
 
         engine.start()
         updateIcon()
+        if Demo.on { runDemo(); return }
         // 第一次运行没有名单也没有定位授权，直接打开设置窗口引导。
         if engine.store.config.ssids.isEmpty {
             KnownNetworksWindow.shared.show(engine: engine)   // 直接弹出已知网络列表
         }
         if !engine.wifiMonitor.locationAuthorized {
             SettingsWindow.shared.show(engine: engine)
+        }
+    }
+
+    /// 截图用：打开设置窗口和已知网络窗口，把窗口编号写到 CLASHGATE_DEMO_OUT，然后点开菜单栏菜单。
+    private func runDemo() {
+        let out = ProcessInfo.processInfo.environment["CLASHGATE_DEMO_OUT"] ?? NSTemporaryDirectory()
+        SettingsWindow.shared.show(engine: engine)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            SettingsWindow.shared.window?.setContentSize(NSSize(width: 500, height: 1060))
+            SettingsWindow.shared.window?.setFrameTopLeftPoint(NSPoint(x: 60, y: NSScreen.main!.visibleFrame.maxY - 20))
+            KnownNetworksWindow.shared.show(engine: self.engine)
+            KnownNetworksWindow.shared.window?.setFrameTopLeftPoint(NSPoint(x: 640, y: NSScreen.main!.visibleFrame.maxY - 20))
+        }
+        // 用应用自己的绘制结果存成 PNG，不需要“屏幕录制”权限。
+        func snap(_ w: NSWindow?, _ name: String) {
+            guard let w = w, let v = w.contentView?.superview,
+                  let rep = v.bitmapImageRepForCachingDisplay(in: v.bounds) else { return }
+            v.cacheDisplay(in: v.bounds, to: rep)
+            try? rep.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: "\(out)/\(name).png"))
+        }
+        func findScroll(_ v: NSView) -> NSScrollView? {
+            if let s = v as? NSScrollView { return s }
+            for c in v.subviews { if let s = findScroll(c) { return s } }
+            return nil
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+            snap(SettingsWindow.shared.window, "settings-\(Demo.mode ?? "x")-top")
+            snap(KnownNetworksWindow.shared.window, "known-networks")
+            // 窗口比屏幕高时，滚到底再拍一张，文档里拼接。
+            if let sv = SettingsWindow.shared.window?.contentView.flatMap(findScroll), let doc = sv.documentView {
+                doc.scroll(NSPoint(x: 0, y: doc.bounds.height))
+                if doc.isFlipped == false { doc.scroll(NSPoint(x: 0, y: 0)) }
+            }
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 4.0) {
+            snap(SettingsWindow.shared.window, "settings-\(Demo.mode ?? "x")-bottom")
+            NSApp.terminate(nil)
         }
     }
 

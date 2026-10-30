@@ -136,7 +136,7 @@ struct SettingsView: View {
             Toggle("同时忘记该网络（需要管理员权限，可能失败）", isOn: $store.config.forgetNetwork)
                 .disabled(!store.config.autoDisconnect)
             Toggle("发送系统通知", isOn: $store.config.notify)
-            Toggle("开机自启", isOn: Binding(get: { login.isOn }, set: { login.set($0) }))
+            Toggle("开机自启", isOn: Binding(get: { login.isOn || Demo.on }, set: { login.set($0) }))
             HStack {
                 Text(login.note).font(.callout).foregroundStyle(.secondary)
                 if login.status == .requiresApproval {
@@ -186,7 +186,7 @@ struct SettingsView: View {
 
 final class SettingsWindow {
     static let shared = SettingsWindow()
-    private var window: NSWindow?
+    private(set) var window: NSWindow?
 
     func show(engine: GuardEngine) {
         if window == nil {
@@ -251,7 +251,7 @@ struct KnownNetworksView: View {
 
 final class KnownNetworksWindow {
     static let shared = KnownNetworksWindow()
-    private var window: NSWindow?
+    private(set) var window: NSWindow?
 
     func show(engine: GuardEngine) {
         if window == nil {

@@ -10,6 +10,7 @@ final class LoginItem: ObservableObject {
     var isOn: Bool { status == .enabled || status == .requiresApproval }
 
     var note: String {
+        if Demo.on { return "已开启" }
         switch status {
         case .enabled: return "已开启"
         case .requiresApproval: return "需要在 系统设置 → 通用 → 登录项 里允许"

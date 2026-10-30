@@ -43,6 +43,11 @@ final class ConfigStore: ObservableObject {
     let url: URL
 
     private init() {
+        if Demo.on {
+            url = FileManager.default.temporaryDirectory.appendingPathComponent("clashgate-demo.json")
+            config = Demo.config
+            return
+        }
         let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
         let dir = base.appendingPathComponent("ClashGate", isDirectory: true)
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
@@ -61,6 +66,7 @@ final class ConfigStore: ObservableObject {
     }
 
     private func save() {
+        if Demo.on { return }
         let enc = JSONEncoder()
         enc.outputFormatting = [.prettyPrinted, .sortedKeys]
         if let data = try? enc.encode(config) { try? data.write(to: url, options: .atomic) }

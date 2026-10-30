@@ -77,6 +77,7 @@ final class WiFiMonitor: NSObject, CWEventDelegate, CLLocationManagerDelegate {
     }
 
     var locationStatusText: String {
+        if Demo.on { return "已授权" }
         switch location.authorizationStatus {
         case .notDetermined: return "尚未授权"
         case .denied: return "已拒绝"
@@ -123,6 +124,7 @@ final class WiFiMonitor: NSObject, CWEventDelegate, CLLocationManagerDelegate {
     // MARK: 已知网络（系统保存的 Wi-Fi 列表，不需要定位权限）
 
     static func knownNetworks() -> [String] {
+        if Demo.on { return Demo.known }
         guard let cfg = CWWiFiClient.shared().interface()?.configuration() else { return [] }
         let profiles = cfg.networkProfiles.array as? [CWNetworkProfile] ?? []
         var seen = Set<String>()
