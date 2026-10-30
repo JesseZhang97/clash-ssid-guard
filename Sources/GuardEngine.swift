@@ -28,7 +28,7 @@ final class GuardEngine: ObservableObject {
     init() {
         let dir = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask)[0].appendingPathComponent("Logs", isDirectory: true)
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-        logURL = dir.appendingPathComponent("ClashSSIDGuard.log")
+        logURL = dir.appendingPathComponent("ClashGate.log")
     }
 
     func start() {

@@ -108,7 +108,7 @@ final class ClashMonitor {
 
         var ctx = SCDynamicStoreContext(version: 0, info: Unmanaged.passUnretained(self).toOpaque(),
                                         retain: nil, release: nil, copyDescription: nil)
-        store = SCDynamicStoreCreate(nil, "ClashSSIDGuard" as CFString, { _, _, info in
+        store = SCDynamicStoreCreate(nil, "ClashGate" as CFString, { _, _, info in
             guard let info = info else { return }
             let me = Unmanaged<ClashMonitor>.fromOpaque(info).takeUnretainedValue()
             me.scheduleRefresh()

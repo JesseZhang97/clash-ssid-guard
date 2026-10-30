@@ -1,4 +1,6 @@
-# Clash SSID Guard
+# Clash Gate
+
+(原名 Clash SSID Guard。)
 
 macOS 菜单栏小工具：Clash 开启时，如果当前连接的 Wi-Fi 命中名单，就提醒并断开。
 
@@ -15,7 +17,7 @@ xcode-select --install   # 已经装过就跳过
 ./install.sh             # 构建、安装到 ~/Applications 并启动
 ```
 
-只构建：`./build.sh`。调试：`build/ClashSSIDGuard.app/Contents/MacOS/ClashSSIDGuard --status`。
+只构建：`./build.sh`。调试：`build/ClashGate.app/Contents/MacOS/ClashGate --status`。
 
 ## 判断逻辑
 
@@ -30,4 +32,4 @@ xcode-select --install   # 已经装过就跳过
 - 读取 SSID 需要定位权限（macOS 14 起）。首次启动会请求授权。授权被拒绝时，应用能看到“已连接”，但读不到名称，也就无法判断。
 - 默认 ad-hoc 签名，重新构建后系统可能要求重新授权定位。可以用 `SIGN_ID` 指定开发者证书。
 - 本机系统代理视为 Clash 开启，不区分是不是 Clash。
-- 配置文件：`~/Library/Application Support/ClashSSIDGuard/config.json`，日志：`~/Library/Logs/ClashSSIDGuard.log`。
+- 配置文件：`~/Library/Application Support/ClashGate/config.json`，日志：`~/Library/Logs/ClashGate.log`。

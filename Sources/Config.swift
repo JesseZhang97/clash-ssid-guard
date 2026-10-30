@@ -44,9 +44,14 @@ final class ConfigStore: ObservableObject {
 
     private init() {
         let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-        let dir = base.appendingPathComponent("ClashSSIDGuard", isDirectory: true)
+        let dir = base.appendingPathComponent("ClashGate", isDirectory: true)
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         let file = dir.appendingPathComponent("config.json")
+        // 从旧名字（ClashSSIDGuard）迁移配置。
+        let old = base.appendingPathComponent("ClashSSIDGuard/config.json")
+        if !FileManager.default.fileExists(atPath: file.path), FileManager.default.fileExists(atPath: old.path) {
+            try? FileManager.default.copyItem(at: old, to: file)
+        }
         url = file
         if let data = try? Data(contentsOf: file), let c = try? JSONDecoder().decode(Config.self, from: data) {
             config = c

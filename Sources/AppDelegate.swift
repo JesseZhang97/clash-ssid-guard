@@ -46,7 +46,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUser
         let appItem = NSMenuItem()
         main.addItem(appItem)
         let appMenu = NSMenu()
-        appMenu.addItem(withTitle: "退出 Clash SSID Guard", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
+        appMenu.addItem(withTitle: "退出 Clash Gate", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         appItem.submenu = appMenu
 
         let editItem = NSMenuItem()
@@ -65,22 +65,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUser
     private func updateIcon() {
         guard let button = statusItem?.button else { return }
         let cfg = engine.store.config
-        let symbol: String
-        var tint: NSColor? = nil
-        var tip: String
+        let name: String
+        let tip: String
         if !cfg.enabled {
-            symbol = "shield.slash"; tip = "防护已暂停"
+            name = "tray-paused"; tip = "防护已暂停"
         } else if engine.alerting {
-            symbol = "exclamationmark.shield.fill"; tint = .systemRed; tip = "当前网络命中名单，Clash 已开启"
+            name = "tray-alert"; tip = "当前网络命中名单，Clash 已开启"
         } else if engine.clash.active {
-            symbol = "checkmark.shield.fill"; tip = "Clash 开启，当前网络正常"
+            name = "tray-active"; tip = "Clash 开启，当前网络正常"
         } else {
-            symbol = "checkmark.shield"; tip = "Clash 未开启"
+            name = "tray-normal"; tip = "Clash 未开启"
         }
-        let img = NSImage(systemSymbolName: symbol, accessibilityDescription: tip)
-        img?.isTemplate = true
+        let img = NSImage(named: name)
+        img?.size = NSSize(width: 18, height: 18)
+        img?.isTemplate = (name != "tray-alert")   // 告警图标自带红色，其余跟随菜单栏深浅色
+        img?.accessibilityDescription = tip
         button.image = img
-        button.contentTintColor = tint
+        button.contentTintColor = nil
         button.toolTip = tip
     }
 

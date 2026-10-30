@@ -3,11 +3,12 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleDevelopmentRegion</key><string>zh_CN</string>
-	<key>CFBundleExecutable</key><string>ClashSSIDGuard</string>
-	<key>CFBundleIdentifier</key><string>com.jesse.ClashSSIDGuard</string>
+	<key>CFBundleExecutable</key><string>ClashGate</string>
+	<key>CFBundleIdentifier</key><string>com.jesse.ClashGate</string>
 	<key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
-	<key>CFBundleName</key><string>ClashSSIDGuard</string>
-	<key>CFBundleDisplayName</key><string>Clash SSID Guard</string>
+	<key>CFBundleIconFile</key><string>AppIcon</string>
+	<key>CFBundleName</key><string>ClashGate</string>
+	<key>CFBundleDisplayName</key><string>Clash Gate</string>
 	<key>CFBundlePackageType</key><string>APPL</string>
 	<key>CFBundleShortVersionString</key><string>1.0.0</string>
 	<key>CFBundleVersion</key><string>1</string>

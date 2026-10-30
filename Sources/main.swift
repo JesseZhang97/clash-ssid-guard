@@ -1,6 +1,6 @@
 import AppKit
 
-// 调试用：`ClashSSIDGuard --status` 打印当前 Clash 和 Wi-Fi 状态后退出。
+// 调试用：`ClashGate --status` 打印当前 Clash 和 Wi-Fi 状态后退出。
 if CommandLine.arguments.contains("--status") {
     let c = ClashMonitor.snapshot()
     let w = WiFiMonitor.readInfo()

@@ -163,7 +163,7 @@ final class SettingsWindow {
         if window == nil {
             let host = NSHostingController(rootView: SettingsView(engine: engine, store: engine.store))
             let w = NSWindow(contentViewController: host)
-            w.title = "Clash SSID Guard"
+            w.title = "Clash Gate"
             w.styleMask = [.titled, .closable, .miniaturizable, .resizable]
             w.setContentSize(NSSize(width: 500, height: 680))
             w.isReleasedWhenClosed = false

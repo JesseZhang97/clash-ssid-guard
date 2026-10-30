@@ -4,8 +4,10 @@ set -euo pipefail
 cd "$(dirname "$0")"
 ./build.sh
 mkdir -p "$HOME/Applications"
-pkill -x ClashSSIDGuard 2>/dev/null || true
+pkill -x ClashGate 2>/dev/null || true
+pkill -x ClashSSIDGuard 2>/dev/null || true   # 旧名字
 rm -rf "$HOME/Applications/ClashSSIDGuard.app"
-cp -R build/ClashSSIDGuard.app "$HOME/Applications/"
-open "$HOME/Applications/ClashSSIDGuard.app"
-echo "已安装并启动：$HOME/Applications/ClashSSIDGuard.app"
+rm -rf "$HOME/Applications/ClashGate.app"
+cp -R build/ClashGate.app "$HOME/Applications/"
+open "$HOME/Applications/ClashGate.app"
+echo "已安装并启动：$HOME/Applications/ClashGate.app"
