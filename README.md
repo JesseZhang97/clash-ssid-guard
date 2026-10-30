@@ -32,7 +32,19 @@ macOS 菜单栏小工具：**Clash 开启时，如果当前连接的 Wi-Fi 命�
 
 菜单栏点击图标会显示：当前 Wi-Fi、Clash 状态、名单模式和数量，以及“启用防护”、“加入名单”（当前网络或已知网络）、“设置…”、“开机自启”和“退出”。
 
-## 安装
+## 下载安装（不用编译）
+
+从 [Releases](https://github.com/JesseZhang97/clash-ssid-guard/releases/latest) 下载 `ClashGate-*.zip`，解压后把 `ClashGate.app` 拖进“应用程序”文件夹（或 `~/Applications`）。支持 macOS 13 或更新版本，Apple 芯片和 Intel 都可以。
+
+这个包只做了 ad-hoc 签名，没有经过苹果公证，所以第一次打开会被系统拦下，提示“无法验证开发者”。任选一种方法放行：
+
+- 在访达里右键点 `ClashGate.app`，选“打开”，再在弹窗里点“打开”。
+- 如果右键打开也不行（macOS 15 起更严格）：先双击一次，然后打开 系统设置 → 隐私与安全性，拉到底点“仍要打开”。
+- 或者在终端里去掉下载标记：`xattr -dr com.apple.quarantine /Applications/ClashGate.app`。
+
+下载的 zip 附有 SHA-256 校验值，可以用 `shasum -a 256 ClashGate-*.zip` 对照 Release 页面里的值。想自己确认代码，也可以按下面的方法自己编译。
+
+## 从源码编译安装
 
 要求 macOS 13 或更新版本，已安装 Command Line Tools：
 
@@ -43,7 +55,7 @@ cd clash-ssid-guard
 ./install.sh             # 构建、安装到 ~/Applications 并启动
 ```
 
-只构建不安装：`./build.sh`，产物在 `build/ClashGate.app`。
+只构建不安装：`./build.sh`，产物在 `build/ClashGate.app`。打发布包：`./release.sh`，生成 Apple 芯片加 Intel 通用的 `dist/ClashGate-<版本>.zip`。
 
 首次启动：
 
