@@ -95,7 +95,7 @@ final class ClashMonitor {
             if proc_name(pid, &buf, UInt32(buf.count)) <= 0 { continue }
             let name = String(cString: buf)
             let low = name.lowercased()
-            if low.contains("guard") { continue }
+            if low.contains("guard") || low.contains("clashgate") { continue }   // 排除自己（含旧名字）
             if low.contains("clash") || low.contains("mihomo") { return name }
         }
         return nil
