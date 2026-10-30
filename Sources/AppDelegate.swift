@@ -32,7 +32,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUser
         engine.start()
         updateIcon()
         // 第一次运行没有名单也没有定位授权，直接打开设置窗口引导。
-        if engine.store.config.ssids.isEmpty || !engine.wifiMonitor.locationAuthorized {
+        if engine.store.config.ssids.isEmpty {
+            KnownNetworksWindow.shared.show(engine: engine)   // 直接弹出已知网络列表
+        }
+        if !engine.wifiMonitor.locationAuthorized {
             SettingsWindow.shared.show(engine: engine)
         }
     }
@@ -114,6 +117,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUser
             menu.addItem(add)
         }
 
+        let known = NSMenuItem(title: "从已知网络中选择…", action: #selector(openKnown), keyEquivalent: "")
+        known.target = self
+        menu.addItem(known)
+
         let settings = NSMenuItem(title: "设置…", action: #selector(openSettings), keyEquivalent: ",")
         settings.target = self
         menu.addItem(settings)
@@ -135,6 +142,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUser
 
     @objc private func toggleEnabled() { engine.store.config.enabled.toggle() }
     @objc private func addCurrent() { engine.addCurrentSSID() }
+    @objc private func openKnown() { KnownNetworksWindow.shared.show(engine: engine) }
     @objc private func openSettings() { SettingsWindow.shared.show(engine: engine) }
 
     @objc private func toggleLogin() {

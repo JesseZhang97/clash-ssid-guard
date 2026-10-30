@@ -120,6 +120,19 @@ final class WiFiMonitor: NSObject, CWEventDelegate, CLLocationManagerDelegate {
         DispatchQueue.main.async { [weak self] in self?.refresh() }
     }
 
+    // MARK: 已知网络（系统保存的 Wi-Fi 列表，不需要定位权限）
+
+    static func knownNetworks() -> [String] {
+        guard let cfg = CWWiFiClient.shared().interface()?.configuration() else { return [] }
+        let profiles = cfg.networkProfiles.array as? [CWNetworkProfile] ?? []
+        var seen = Set<String>()
+        var out: [String] = []
+        for p in profiles {
+            if let s = p.ssid, !s.isEmpty, seen.insert(s).inserted { out.append(s) }
+        }
+        return out
+    }
+
     // MARK: 断开
 
     /// 返回一行结果说明，用于日志。

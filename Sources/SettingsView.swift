@@ -89,6 +89,7 @@ struct SettingsView: View {
                     .onSubmit(add)
                 Button("添加", action: add).disabled(newSSID.trimmingCharacters(in: .whitespaces).isEmpty)
             }
+            Button("从已知网络中选择…") { KnownNetworksWindow.shared.show(engine: engine) }
             if let cur = engine.wifi.ssid, !store.config.ssids.contains(cur) {
                 Button("把当前网络「\(cur)」加入名单") { store.add(cur) }
             }
@@ -168,6 +169,71 @@ final class SettingsWindow {
             w.title = "Clash SSID Guard"
             w.styleMask = [.titled, .closable, .miniaturizable, .resizable]
             w.setContentSize(NSSize(width: 500, height: 680))
+            w.isReleasedWhenClosed = false
+            w.center()
+            window = w
+        }
+        NSApp.activate(ignoringOtherApps: true)
+        window?.makeKeyAndOrderFront(nil)
+    }
+}
+
+
+// MARK: 已知网络选择
+
+struct KnownNetworksView: View {
+    @ObservedObject var engine: GuardEngine
+    @ObservedObject var store: ConfigStore
+    @State private var networks: [String] = WiFiMonitor.knownNetworks()
+    @State private var query = ""
+
+    private var shown: [String] {
+        let q = query.trimmingCharacters(in: .whitespaces)
+        return q.isEmpty ? networks : networks.filter { $0.localizedCaseInsensitiveContains(q) }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("系统已保存的 Wi-Fi（\(networks.count) 个）").font(.headline)
+            Text(store.config.mode == .blacklist
+                 ? "勾选的网络会进入黑名单：Clash 开启时连上它们会被断开。"
+                 : "勾选的网络会进入白名单：Clash 开启时只放行它们，其他网络会被断开。")
+                .font(.callout).foregroundStyle(.secondary)
+            TextField("搜索", text: $query).textFieldStyle(.roundedBorder)
+            List(shown, id: \.self) { s in
+                Toggle(isOn: Binding(
+                    get: { store.config.ssids.contains(s) },
+                    set: { $0 ? store.add(s) : store.remove(s) })) {
+                    HStack {
+                        Text(s)
+                        if s == engine.wifi.ssid {
+                            Text("当前网络").font(.caption).foregroundStyle(.orange)
+                        }
+                    }
+                }
+            }
+            HStack {
+                Text("已选 \(store.config.ssids.count) 个").foregroundStyle(.secondary)
+                Spacer()
+                Button("重新读取") { networks = WiFiMonitor.knownNetworks() }
+            }
+        }
+        .padding(16)
+        .frame(minWidth: 380, minHeight: 460)
+    }
+}
+
+final class KnownNetworksWindow {
+    static let shared = KnownNetworksWindow()
+    private var window: NSWindow?
+
+    func show(engine: GuardEngine) {
+        if window == nil {
+            let host = NSHostingController(rootView: KnownNetworksView(engine: engine, store: engine.store))
+            let w = NSWindow(contentViewController: host)
+            w.title = "选择 Wi-Fi 名单"
+            w.styleMask = [.titled, .closable, .resizable]
+            w.setContentSize(NSSize(width: 400, height: 520))
             w.isReleasedWhenClosed = false
             w.center()
             window = w
