@@ -6,6 +6,7 @@ struct SettingsView: View {
     @ObservedObject var store: ConfigStore
     @ObservedObject var login = LoginItem.shared
     @State private var newSSID = ""
+    @State private var known: [String] = []
 
     var body: some View {
         Form {
@@ -89,11 +90,31 @@ struct SettingsView: View {
                     .onSubmit(add)
                 Button("添加", action: add).disabled(newSSID.trimmingCharacters(in: .whitespaces).isEmpty)
             }
-            Button("从已知网络中选择…") { KnownNetworksWindow.shared.show(engine: engine) }
-            if let cur = engine.wifi.ssid, !store.config.ssids.contains(cur) {
-                Button("把当前网络「\(cur)」加入名单") { store.add(cur) }
-            }
+            addMenu
         }
+    }
+
+    /// 下拉按钮：加入当前网络，或从已知网络里选一个，或打开多选窗口。
+    private var addMenu: some View {
+        Menu("加入名单") {
+            if let cur = engine.wifi.ssid, !store.config.ssids.contains(cur) {
+                Button("加入当前网络「\(cur)」") { store.add(cur) }
+                Divider()
+            }
+            let candidates = known.filter { !store.config.ssids.contains($0) }
+            if candidates.isEmpty {
+                Text("没有可选的已知网络")
+            } else {
+                Section("已知网络") {
+                    ForEach(candidates, id: \.self) { s in
+                        Button(s == engine.wifi.ssid ? "\(s)（当前）" : s) { store.add(s) }
+                    }
+                }
+            }
+            Divider()
+            Button("多选…") { KnownNetworksWindow.shared.show(engine: engine) }
+        }
+        .onAppear { known = WiFiMonitor.knownNetworks() }
     }
 
     private func add() {

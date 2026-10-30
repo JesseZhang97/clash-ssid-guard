@@ -111,15 +111,35 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUser
         enable.state = cfg.enabled ? .on : .off
         menu.addItem(enable)
 
+        let addItem = NSMenuItem(title: "加入名单", action: nil, keyEquivalent: "")
+        let sub = NSMenu()
         if let cur = w.ssid, !cfg.ssids.contains(cur) {
-            let add = NSMenuItem(title: "把「\(cur)」加入名单", action: #selector(addCurrent), keyEquivalent: "")
-            add.target = self
-            menu.addItem(add)
+            let c = NSMenuItem(title: "加入当前网络「\(cur)」", action: #selector(addNamed(_:)), keyEquivalent: "")
+            c.target = self
+            c.representedObject = cur
+            sub.addItem(c)
+            sub.addItem(.separator())
         }
-
-        let known = NSMenuItem(title: "从已知网络中选择…", action: #selector(openKnown), keyEquivalent: "")
-        known.target = self
-        menu.addItem(known)
+        let candidates = WiFiMonitor.knownNetworks().filter { !cfg.ssids.contains($0) }
+        if candidates.isEmpty {
+            sub.addItem(info("没有可选的已知网络"))
+        } else {
+            let head = NSMenuItem(title: "已知网络", action: nil, keyEquivalent: "")
+            head.isEnabled = false
+            sub.addItem(head)
+            for s in candidates {
+                let it = NSMenuItem(title: s == w.ssid ? "\(s)（当前）" : s, action: #selector(addNamed(_:)), keyEquivalent: "")
+                it.target = self
+                it.representedObject = s
+                sub.addItem(it)
+            }
+        }
+        sub.addItem(.separator())
+        let multi = NSMenuItem(title: "多选…", action: #selector(openKnown), keyEquivalent: "")
+        multi.target = self
+        sub.addItem(multi)
+        addItem.submenu = sub
+        menu.addItem(addItem)
 
         let settings = NSMenuItem(title: "设置…", action: #selector(openSettings), keyEquivalent: ",")
         settings.target = self
@@ -141,7 +161,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUser
     }
 
     @objc private func toggleEnabled() { engine.store.config.enabled.toggle() }
-    @objc private func addCurrent() { engine.addCurrentSSID() }
+    @objc private func addNamed(_ sender: NSMenuItem) { if let s = sender.representedObject as? String { engine.store.add(s) } }
     @objc private func openKnown() { KnownNetworksWindow.shared.show(engine: engine) }
     @objc private func openSettings() { SettingsWindow.shared.show(engine: engine) }
 
