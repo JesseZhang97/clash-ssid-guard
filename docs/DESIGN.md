@@ -31,7 +31,7 @@ Clash 开启时，不允许 Mac 停留在名单里的 Wi-Fi 上。macOS 没有�
 
 ## Clash 开启的定义
 
-- 系统代理（HTTP、HTTPS 或 SOCKS）指向 127.0.0.1 或 localhost。
+- 系统代理（HTTP、HTTPS 或 SOCKS）指向本机（127.0.0.1、localhost、::1 或 0.0.0.0），或 PAC 地址指向本机。
 - 存在 TUN 接口：名称以 `utun` 开头，且地址在 198.18.0.0/15。
 - 进程名包含 `clash` 或 `mihomo`，只用来显示“已运行”，不算开启。应用自己的进程（名称含 `ClashGate`）会被排除。
 
