@@ -11,7 +11,7 @@ struct SettingsView: View {
 
     var body: some View {
         Form {
-            masterSection
+            statusSection
             behaviorSection
             listSection
             locationSection
@@ -24,8 +24,22 @@ struct SettingsView: View {
 
     // MARK: 状态
 
-    private var masterSection: some View {
-        Section {
+    private var statusSection: some View {
+        Section("当前状态") {
+            row("Wi-Fi", dot: engine.wifi.connected ? (engine.alerting ? .red : .green) : .gray,
+                text: wifiText)
+            row("Clash", dot: engine.clash.active ? .green : (engine.clash.appRunning ? .orange : .gray),
+                text: engine.clash.headline)
+            if let p = engine.clash.proxyDetail { detail("系统代理", p) }
+            if let t = engine.clash.tunDetail { detail("TUN 接口", t) }
+            if let n = engine.clash.processName { detail("进程", n) }
+            if engine.alerting {
+                Text("当前网络命中名单且 Clash 开启。").foregroundStyle(.red).font(.callout)
+            }
+        }
+    }
+
+    private var masterSwitch: some View {
             HStack(spacing: 14) {
                 VStack(alignment: .leading, spacing: 3) {
                     Text("防护").font(.system(size: 22, weight: .semibold))
@@ -42,18 +56,6 @@ struct SettingsView: View {
                     .padding(.trailing, 4)
             }
             .padding(.vertical, 8)
-
-            row("Wi-Fi", dot: engine.wifi.connected ? (engine.alerting ? .red : .green) : .gray,
-                text: wifiText)
-            row("Clash", dot: engine.clash.active ? .green : (engine.clash.appRunning ? .orange : .gray),
-                text: engine.clash.headline)
-            if let p = engine.clash.proxyDetail { detail("系统代理", p) }
-            if let t = engine.clash.tunDetail { detail("TUN 接口", t) }
-            if let n = engine.clash.processName { detail("进程", n) }
-            if engine.alerting {
-                Text("当前网络命中名单且 Clash 开启。").foregroundStyle(.red).font(.callout)
-            }
-        }
     }
 
     private var wifiText: String {
@@ -129,6 +131,7 @@ struct SettingsView: View {
 
     private var behaviorSection: some View {
         Section("行为") {
+            masterSwitch
             Toggle("命中后自动断开", isOn: $store.config.autoDisconnect)
             Toggle("同时忘记该网络（需要管理员权限，可能失败）", isOn: $store.config.forgetNetwork)
                 .disabled(!store.config.autoDisconnect)
